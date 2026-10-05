@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -33,6 +34,14 @@ export class UsersController {
     @Query('qs') qs: string
   ) {
     return await this.usersService.findAll(current, limit,qs);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @ResponseMessage('Xem thông tin cá nhân')
+  @Get('me')
+  async getProfile(@Req() req: Request) {
+    // Trả về thông tin user đang đăng nhập (lấy từ session)
+    return (req.session as any).user;
   }
 
   @Roles(Role.Admin)

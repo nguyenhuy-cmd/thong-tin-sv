@@ -6,7 +6,13 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { StudentsModule } from './students/students.module.js';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -49,9 +55,14 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       }),
     }),
 
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     UsersModule,
 
     AuthModule,
+
+    StudentsModule,
     
   ],
   controllers: [AppController],

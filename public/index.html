@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sinh viên</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; }
+        #app-container { max-width: 1100px; margin: auto; padding: 20px; }
+        .hidden { display: none !important; }
+        .navbar { margin-bottom: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- Phân vùng Auth (Login / Register) -->
+    <div id="auth-section" class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm mt-5">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4 text-primary" id="auth-title">Đăng nhập</h3>
+                    <form id="auth-form">
+                        <div class="mb-3 hidden" id="username-group">
+                            <label class="form-label">Tên người dùng</label>
+                            <input type="text" id="username" class="form-control" placeholder="Nhập username">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="email" class="form-control" placeholder="Nhập email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu</label>
+                            <input type="password" id="password" class="form-control" placeholder="Nhập mật khẩu" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold" id="auth-btn">Đăng nhập</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" id="toggle-auth" class="text-decoration-none">Chưa có tài khoản? Đăng ký ngay!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân vùng Dashboard -->
+    <div id="dashboard-section" class="hidden">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 shadow-sm">
+            <a class="navbar-brand fw-bold" href="#">🎓 Hệ Thống Quản Lý Sinh Viên</a>
+            <div class="d-flex w-100 justify-content-end align-items-center gap-3">
+                <span class="text-light fw-medium" id="user-info">Xin chào, ...</span>
+                <button class="btn btn-light btn-sm fw-bold text-primary" id="logout-btn">Đăng xuất</button>
+            </div>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-4 align-items-center">
+                    <h4 class="mb-0 text-secondary border-bottom pb-2 border-primary border-3" style="display:inline-block">Danh sách sinh viên</h4>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="search-input" class="form-control" placeholder="🔍 Tìm tên hoặc mã sinh viên...">
+                        <button class="btn btn-success fw-bold px-4" id="add-student-btn" data-bs-toggle="modal" data-bs-target="#studentModal">+ Thêm mới</button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-primary text-center">
+                            <tr>
+                                <th>ID</th>
+                                <th>Mã SV</th>
+                                <th>Họ tên</th>
+                                <th>Ngày sinh</th>
+                                <th>Giới tính</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Địa chỉ</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-tbody">
+                            <!-- Dữ liệu fetch từ API sẽ đổ vào đây -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm/Sửa Sinh Viên -->
+<div class="modal fade" id="studentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="modal-title">Thêm sinh viên mới</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="student-form">
+            <input type="hidden" id="student-id">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="fw-medium mb-1">Mã SV</label>
+                    <input type="text" id="s-code" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-medium mb-1">Họ tên</label>
+                    <input type="text" id="s-name" class="form-control" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="fw-medium mb-1">Ngày sinh</label>
+                    <input type="date" id="s-dob" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-medium mb-1">Giới tính</label>
+                    <select id="s-gender" class="form-select">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="fw-medium mb-1">Email</label>
+                <input type="email" id="s-email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="fw-medium mb-1">Số điện thoại</label>
+                <input type="text" id="s-phone" class="form-control" required>
+            </div>
+            <div class="mb-4">
+                <label class="fw-medium mb-1">Địa chỉ</label>
+                <input type="text" id="s-address" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2">LƯU THÔNG TIN</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_URL = '';
+    let isLoginMode = true;
+    let currentUser = null;
+
+    // Elements
+    const authSection = document.getElementById('auth-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const authForm = document.getElementById('auth-form');
+    const toggleAuth = document.getElementById('toggle-auth');
+    const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
+
+    // Khởi động
+    checkSession();
+
+    toggleAuth.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLoginMode = !isLoginMode;
+        document.getElementById('auth-title').innerText = isLoginMode ? 'Đăng nhập' : 'Đăng ký';
+        document.getElementById('auth-btn').innerText = isLoginMode ? 'Đăng nhập' : 'Đăng ký';
+        document.getElementById('username-group').classList.toggle('hidden', isLoginMode);
+        toggleAuth.innerText = isLoginMode ? 'Chưa có tài khoản? Đăng ký ngay!' : 'Đã có tài khoản? Đăng nhập!';
+    });
+
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const username = document.getElementById('username').value;
+
+        const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
+        const body = isLoginMode ? { email, password } : { username, email, password };
+
+        try {
+            const res = await fetch(`${API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (!isLoginMode) {
+                    alert('Đăng ký thành công! Vui lòng đăng nhập.');
+                    toggleAuth.click(); // switch back to login
+                } else {
+                    checkSession(); // load dashboard
+                }
+            } else {
+                alert(data.message || 'Có lỗi xảy ra!');
+            }
+        } catch (err) { alert('Lỗi kết nối server!'); }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        await fetch(`${API_URL}/auth/logout`, { method: 'POST' });
+        currentUser = null;
+        authSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+    });
+
+    async function checkSession() {
+        try {
+            const res = await fetch(`${API_URL}/users/me`);
+            if (res.ok) {
+                const body = await res.json();
+                currentUser = body.data || body; // Vì TransformInterceptor bọc data ở trong .data
+                authSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                
+                let roleBadge = currentUser.role === 'admin' ? '<span class="badge bg-danger">Admin</span>' : '<span class="badge bg-info text-dark">User</span>';
+                document.getElementById('user-info').innerHTML = `Xin chào, <b>${currentUser.username}</b> ${roleBadge}`;
+                
+                // User thường không được thêm mới (theo đề bài chỉ xem thông tin)
+                if(currentUser.role !== 'admin') {
+                    document.getElementById('add-student-btn').classList.add('hidden');
+                } else {
+                    document.getElementById('add-student-btn').classList.remove('hidden');
+                }
+
+                loadStudents();
+            }
+        } catch (err) { }
+    }
+
+    async function loadStudents() {
+        const qs = document.getElementById('search-input').value;
+        const res = await fetch(`${API_URL}/students?qs=${qs}`);
+        const responseBody = await res.json();
+        const data = responseBody.data || responseBody;
+        
+        const tbody = document.getElementById('student-tbody');
+        tbody.innerHTML = '';
+        
+        // NestJS API trả về { meta: {}, result: [] }
+        const list = data.result || [];
+
+        if(list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Không có sinh viên nào.</td></tr>`;
+            return;
+        }
+
+        list.forEach(s => {
+            // Admin sửa tất, User thường chỉ sửa thông tin mình tạo
+            const canEdit = currentUser.role === 'admin' || currentUser.id === s.userId;
+            const canDelete = currentUser.role === 'admin'; // Giả sử chỉ Admin mới được xóa
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="text-center fw-medium">${s.id}</td>
+                    <td class="text-center"><span class="badge bg-secondary">${s.studentCode}</span></td>
+                    <td class="fw-bold text-primary">${s.fullName}</td>
+                    <td class="text-center">${s.birthday}</td>
+                    <td class="text-center">${s.gender}</td>
+                    <td>${s.email}</td>
+                    <td class="text-center">${s.phone}</td>
+                    <td>${s.address}</td>
+                    <td class="text-center">
+                        ${canEdit ? `<button class="btn btn-sm btn-outline-warning fw-bold" onclick="editStudent(${s.id})">Sửa</button>` : ''}
+                        ${canDelete ? `<button class="btn btn-sm btn-outline-danger fw-bold ms-1" onclick="deleteStudent(${s.id})">Xóa</button>` : ''}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Debounce tìm kiếm (gõ xong 400ms mới search)
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(loadStudents, 400);
+    });
+
+    document.getElementById('add-student-btn').addEventListener('click', () => {
+        document.getElementById('student-form').reset();
+        document.getElementById('student-id').value = '';
+        document.getElementById('modal-title').innerText = 'Thêm sinh viên mới';
+    });
+
+    document.getElementById('student-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('student-id').value;
+        const body = {
+            studentCode: document.getElementById('s-code').value,
+            fullName: document.getElementById('s-name').value,
+            birthday: document.getElementById('s-dob').value,
+            gender: document.getElementById('s-gender').value,
+            email: document.getElementById('s-email').value,
+            phone: document.getElementById('s-phone').value,
+            address: document.getElementById('s-address').value
+        };
+
+        const method = id ? 'PATCH' : 'POST';
+        const endpoint = id ? `/students/${id}` : `/students`;
+
+        const res = await fetch(`${API_URL}${endpoint}`, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        if (res.ok) {
+            studentModal.hide();
+            loadStudents();
+            // Optional alert
+        } else {
+            const data = await res.json();
+            alert('Lỗi: ' + (data.message || JSON.stringify(data)));
+        }
+    });
+
+    window.editStudent = async (id) => {
+        const res = await fetch(`${API_URL}/students/${id}`);
+        if(res.ok) {
+            const resBody = await res.json();
+            const data = resBody.data || resBody;
+            // Data trả về từ API findOne là { id: id, exUser: { ... } }
+            const s = data.exUser;
+            
+            document.getElementById('student-id').value = s.id;
+            document.getElementById('s-code').value = s.studentCode;
+            document.getElementById('s-name').value = s.fullName;
+            document.getElementById('s-dob').value = s.birthday;
+            document.getElementById('s-gender').value = s.gender;
+            document.getElementById('s-email').value = s.email;
+            document.getElementById('s-phone').value = s.phone;
+            document.getElementById('s-address').value = s.address;
+            
+            document.getElementById('modal-title').innerText = 'Sửa thông tin sinh viên';
+            studentModal.show();
+        }
+    }
+
+    window.deleteStudent = async (id) => {
+        if(confirm('Bạn có chắc chắn muốn xóa sinh viên này khỏi hệ thống? Hành động này không thể hoàn tác!')) {
+            const res = await fetch(`${API_URL}/students/${id}`, { method: 'DELETE' });
+            if(res.ok) {
+                loadStudents();
+            } else {
+                alert('Có lỗi xảy ra khi xóa!');
+            }
+        }
+    }
+</script>
+</body>
+</html>

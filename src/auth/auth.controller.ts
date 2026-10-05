@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { CreateLoginDto, CreateRegisterDto } from './dto/create-auth.dto.js';
 import { ResponseMessage } from '../common/decorators/response-message.decorator.js';
@@ -9,8 +10,10 @@ export class AuthController {
 
   @ResponseMessage("Đăng nhập thành công")
   @Post('login')
-  async login(@Body() createLoginDto: CreateLoginDto) {
-    return await this.authService.login(createLoginDto)
+  async login(@Body() createLoginDto: CreateLoginDto, @Req() req: Request) {
+    const user = await this.authService.login(createLoginDto);
+    (req.session as any).user = user;
+    return user;
   }
 
   @ResponseMessage("Đăng kí thành công")
